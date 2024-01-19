@@ -1,15 +1,18 @@
 import { Link, Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
+import appStyles from '../../styles';
+
+const { smallText, mediumText, whiteText } = appStyles
 
 export default function Home() {
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
       <View style={styles.container}>
-        <Text style={{fontSize: 24}}>Home Page</Text>
+        <Text style={[mediumText, whiteText]}>Home Page</Text>
         <Link href={"/home/news-details"}>
-          <Text>Go to news detail page</Text>
+          <Text style={[smallText, whiteText]}>Go to news detail page</Text>
         </Link>
         <StatusBar style="auto" />
       </View>
@@ -17,10 +20,11 @@ export default function Home() {
   );
 }
 
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'lightyellow',
+    backgroundColor: '#222',
     alignItems: 'center',
     justifyContent: 'center',
   },
