@@ -1,7 +1,8 @@
 import { BlurView } from "expo-blur";
 import { Tabs } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { StyleSheet } from "react-native";
+
+import { Ionicons } from "@expo/vector-icons"
 
 export default function TabsLayout() {
 
@@ -10,7 +11,7 @@ export default function TabsLayout() {
             screenOptions={{
                 headerShown: false,
                 tabBarBackground: () => (
-                    <BlurView intensity={50} style={styles.blurContainer} tint="dark"/>
+                    <BlurView intensity={50} style={styles.blurContainer} tint="dark" />
                 ),
                 tabBarStyle: {
                     borderTopColor: 'transparent',
@@ -19,15 +20,31 @@ export default function TabsLayout() {
                     height: 80,
                     borderRadius: 40,
                     paddingTop: 20,
-                    paddingBottom: 20,
+                    paddingBottom: 10,
                     marginHorizontal: '25%',
                     position: 'absolute',
                     backgroundColor: 'transparent'
                 },
             }}
         >
-            <Tabs.Screen name="home" options={{ tabBarLabel: "Home" }} />
-            <Tabs.Screen name="search" options={{ tabBarLabel: "Search" }} />
+            <Tabs.Screen name="home" options={{
+                tabBarLabel: "",
+                tabBarInactiveTintColor: "grey",
+                tabBarIcon: ({ color, size }) => {
+                    return (
+                        <Ionicons name="home-outline" size={size} color={color} />
+                    )
+                },
+            }} />
+            <Tabs.Screen name="search" options={{
+                tabBarLabel: "",
+                tabBarInactiveTintColor: "grey",
+                tabBarIcon: ({ color, size }) => {
+                    return (
+                        <Ionicons name="search" size={size} color={color} />
+                    )
+                }
+            }} />
         </Tabs>
     )
 }
