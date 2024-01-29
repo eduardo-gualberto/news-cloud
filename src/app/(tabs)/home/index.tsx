@@ -1,31 +1,57 @@
 import { Link, Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import appStyles from '../../styles';
 
 import HorizontalCarousel from '../../components/HorizontalCarousel';
 import { signal } from '@preact/signals-react';
-import { useContext, useMemo } from 'react';
+import { useContext, useEffect, useMemo } from 'react';
 import { shadeColor } from '../../utils';
 import NewsCard from '../../components/NewsCard';
 import AppState from '../../../aplication/GlobalState';
+import News from '../../../domain/news/models/news';
+import NewsService from '../../../domain/news/services/news';
+import { ApiNewsCategory } from 'ts-newsapi';
 
 const { smallText, mediumText, whiteText } = appStyles
+
+const news = signal<News[]>([])
+const loading = signal(false)
 
 export default function Home() {
   const { selectedCategory } = useContext(AppState)
 
-  const categories = useMemo(() => ['business', 'entertainment', 'general', 'health', 'science', 'sports', 'technology'], [])
-  const color = useMemo(() => {
-    return Array(categories.length)
-      .fill('')
-      .map(_ => `#${Math.floor(Math.random() * 0x1000000).toString(16).padStart(6, '0')}`)
+  const newsService = useMemo(() => {
+    return new NewsService()
+  }, [])
+  const fetchNews = () => newsService.getTopHeadlinesForCountryAndCategory('us', selectedCategory.value as ApiNewsCategory)
+
+  const categories = useMemo(() => ['all', 'business', 'entertainment', 'general', 'health', 'science', 'sports', 'technology'], [])
+
+  useEffect(() => {
+    loading.value = true
+    const interval = setInterval(() => {
+      fetchNews()
+        .then(res => {
+          if (res.news.length > 0) {
+            news.value = res.news
+            loading.value = false
+            return clearInterval(interval)
+          }
+        })
+        .catch(e => loading.value = false)
+    }, 1000)
+    return () => {
+      loading.value = false
+      clearInterval(interval)
+    }
   }, [])
 
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
       <View style={styles.container}>
+        {/* horizontal carousel */}
         <HorizontalCarousel items={categories} itemGap={15} itemRenderer={(item, key) => (
           <TouchableOpacity
             key={key}
@@ -46,7 +72,37 @@ export default function Home() {
             </Text>
           </TouchableOpacity>
         )} />
-        <NewsCard />
+
+        {/* news list rendering */}
+        <View style={styles.listContainer}>
+          <FlatList
+            style={styles.list}
+            data={news.value}
+            renderItem={({ item }) => {
+              return (
+                <NewsCard news={item} />
+              )
+            }}
+            refreshControl={
+              <RefreshControl
+                refreshing={loading.value}
+                onRefresh={() => {
+                  loading.value = true
+                  fetchNews()
+                    .then(res => {
+                      if (res.news.length > 0) {
+                        news.value = res.news
+                      }
+                      loading.value = false
+                    })
+                    .catch(e => loading.value = false)
+                }}
+                colors={['white']}
+                tintColor={'white'}
+              />
+            }
+          />
+        </View>
         <StatusBar style="auto" />
       </View>
     </>
@@ -62,10 +118,21 @@ const styles = StyleSheet.create({
     paddingTop: 50,
   },
   categoryCard: {
-    height: 35,
-    width: 140,
-    borderRadius: 10,
+    // height: 35,
+    paddingVertical: 7,
+    paddingHorizontal: 10,
+    borderRadius: 7,
     justifyContent: 'center',
     alignItems: 'center'
+  },
+  listContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+  },
+  list: {
+    flex: 1,
+    width: '90%',
   }
 });

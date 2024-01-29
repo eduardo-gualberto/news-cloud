@@ -17,6 +17,14 @@ const shadeColor = (hexColor: string, magnitude: number) => {
   }
 };
 
+const formatPublishedDate = (date: string) => {
+  const options = { month: 'short', day: 'numeric' } as Intl.DateTimeFormatOptions
+  const dateFormatted  = new Date(date).toLocaleDateString("en-US", options)
+  
+  return dateFormatted
+}
+
 export {
-  shadeColor
+  shadeColor,
+  formatPublishedDate
 }

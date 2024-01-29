@@ -1,77 +1,55 @@
-import { FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native'
-import React, { useEffect, useMemo, useContext, useState } from 'react'
-import NewsService from '../../../domain/news/services/news'
-import { ApiNewsCategory } from 'ts-newsapi'
-import { signal } from '@preact/signals-react'
+import { StyleSheet, Text, View } from 'react-native'
+import React, { } from 'react'
+import { Image } from 'expo-image'
 import News from '../../../domain/news/models/news'
 import defaultStyles from '../../styles'
-import AppState from '../../../aplication/GlobalState'
+import { formatPublishedDate } from '../../utils'
 
-const { mediumText, whiteText } = defaultStyles
 
-const news = signal<News[]>([])
-const loading = signal(false)
+const { mediumText, whiteText, smallText, dimmedWhiteText } = defaultStyles
 
-const NewsCard = () => {
-  const { selectedCategory } = useContext(AppState)
-
-  const newsService = useMemo(() => {
-    return new NewsService()
-  }, [])
-
-  const fetchNews = () => newsService.getTopHeadlinesForCountryAndCategory('us', selectedCategory.value as ApiNewsCategory)
-
-  useEffect(() => {
-    loading.value = true
-    const interval = setInterval(() => {
-      fetchNews()
-        .then(res => {
-          if (res.news.length > 0) {
-            news.value = res.news
-            loading.value = false
-            return clearInterval(interval)
-          }
-        })
-        .catch(e => loading.value = false)
-    }, 1000)
-    return () => {
-      loading.value = false
-      clearInterval(interval)
-    }
-  }, [])
+const NewsCard = ({ news }: { news: News }) => {
+  const imageBlurHash =
+    '|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[';
 
   return (
-    <View>
-      <FlatList
-        data={news.value}
-        renderItem={(item) => {
-          return (
-            <Text style={[mediumText, whiteText, { margin: 10 }]}>{item.item.title}</Text>
-          )
-        }}
-        refreshControl={
-          <RefreshControl
-            refreshing={loading.value}
-            onRefresh={() => {
-              loading.value = true
-              fetchNews()
-                .then(res => {                  
-                  if (res.news.length > 0) {
-                    news.value = res.news
-                  }
-                  loading.value = false
-                })
-                .catch(e => loading.value = false)
-            }}
-            colors={['white']}
-            tintColor={'white'}
-          />
-        }
+    <View style={styles.container}>
+      <Image
+        style={styles.image}
+        source={news.urlToImage}
+        placeholder={imageBlurHash}
+        contentFit="cover"
+        transition={1000}
       />
+      <Text style={[mediumText, whiteText, { margin: 10 }]}>
+        {news.title}
+      </Text>
+
+      <Text style={[{textAlign: 'left', width: '100%', marginLeft: 30, marginBottom: 10}, dimmedWhiteText, smallText]}>
+        {formatPublishedDate(news.publishedAt)}
+      </Text>
     </View>
   )
 }
 
 export default NewsCard
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    alignContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.8)',
+    borderRadius: 15,
+    marginBottom: 15,
+    padding: 5
+  },
+  image: {
+    flex: 1,
+    width: '100%',
+    height: 200,
+    backgroundColor: '#0553',
+    borderRadius: 15
+  }
+})
