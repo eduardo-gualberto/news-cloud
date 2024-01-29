@@ -21,6 +21,7 @@ const styles = StyleSheet.create({
     containter: {
         width: "100%",
         padding: 5,
-        paddingLeft: 20
+        paddingLeft: 20,
+        paddingBottom: 20
     }
 })

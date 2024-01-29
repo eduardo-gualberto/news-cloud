@@ -16,7 +16,7 @@ export default class NewsRemoteRepository extends BaseRepository<ParamType, News
                 .then(response => News.fromApiResponse(response))
         
         if(param.topHeadlines)
-            return NewsRemoteRepository.newsApi.getTopHeadlines(param.everything)
+            return NewsRemoteRepository.newsApi.getTopHeadlines(param.topHeadlines)
             .then(response => News.fromApiResponse(response))
 
         return []

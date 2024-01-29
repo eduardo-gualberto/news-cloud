@@ -1,4 +1,6 @@
 import { INewsApiArticle, INewsApiResponse, INewsApiSource } from "ts-newsapi";
+import logger from "../../../aplication/Logger";
+import newsMock from './mock'
 
 const defaults = {
     source: <INewsApiSource>{
@@ -35,8 +37,16 @@ export default class News {
         this.urlToImage = json.urlToImage ?? defaults.urlToImage
     }
 
-    static fromApiResponse(response: INewsApiResponse): News[] {
-        if (response.status === "error") return []
+    static fromApiResponse(response: INewsApiResponse & { message?: string }): News[] {   
+        const loggr = logger.extend('News.fromApiResponse')     
+        if (response.code === "rateLimited") {
+            loggr.error(`NewsAPI imposed a rate limit for the app, using a mock instead.`)
+            return newsMock.articles.map(article => new News(article))
+        }
+        if (response.status === "error") {
+            loggr.error(`API error: ${response.message!}.\n Using a mock instead.`)
+            return newsMock.articles.map(article => new News(article))
+        }
         if (response.totalResults === 0) return []
 
         return response.articles.map(article => new News(article))

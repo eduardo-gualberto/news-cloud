@@ -5,13 +5,16 @@ import appStyles from '../../styles';
 
 import HorizontalCarousel from '../../components/HorizontalCarousel';
 import { signal } from '@preact/signals-react';
-import { useMemo } from 'react';
+import { useContext, useMemo } from 'react';
 import { shadeColor } from '../../utils';
+import NewsCard from '../../components/NewsCard';
+import AppState from '../../../aplication/GlobalState';
 
 const { smallText, mediumText, whiteText } = appStyles
-export const selectedCategoryKey = signal(0)
 
 export default function Home() {
+  const { selectedCategory } = useContext(AppState)
+
   const categories = useMemo(() => ['business', 'entertainment', 'general', 'health', 'science', 'sports', 'technology'], [])
   const color = useMemo(() => {
     return Array(categories.length)
@@ -27,19 +30,23 @@ export default function Home() {
           <TouchableOpacity
             key={key}
             onPress={() => {
-              selectedCategoryKey.value = key
+              selectedCategory.value = item
             }}
-            style={[styles.categoryCard,
-            { borderColor: color[key] },
-            { backgroundColor: selectedCategoryKey.value === key ? shadeColor(color[key], -40) : 'transparent' }
+            style={[
+              styles.categoryCard,
+              { backgroundColor: selectedCategory.value === item ? 'lightgrey' : 'rgba(255,255,255,0.2)' }
             ]}
           >
-            <Text style={[smallText, whiteText, { fontWeight: selectedCategoryKey.value === key ? 'bold' : 'normal' }]}>
+            <Text style={[
+              smallText,
+              whiteText,
+              { color: selectedCategory.value === item ? 'black' : 'white' }
+            ]}>
               {item}
             </Text>
           </TouchableOpacity>
         )} />
-        <Text style={[smallText, whiteText]}>Selecionado: {selectedCategoryKey.value}</Text>
+        <NewsCard />
         <StatusBar style="auto" />
       </View>
     </>
@@ -55,9 +62,8 @@ const styles = StyleSheet.create({
     paddingTop: 50,
   },
   categoryCard: {
-    borderWidth: 1,
     height: 35,
-    width: 150,
+    width: 140,
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center'
