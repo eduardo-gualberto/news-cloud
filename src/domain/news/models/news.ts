@@ -40,7 +40,7 @@ export default class News {
     static fromApiResponse(response: INewsApiResponse & { message?: string }): News[] {   
         const loggr = logger.extend('News.fromApiResponse')     
         if (response.code === "rateLimited") {
-            loggr.error(`NewsAPI imposed a rate limit for the app, using a mock instead.`)
+            loggr.warn(`NewsAPI imposed a rate limit for the app, using a mock instead.`)
             return newsMock.articles.map(article => new News(article))
         }
         if (response.status === "error") {

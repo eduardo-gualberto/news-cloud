@@ -11,7 +11,7 @@ import News from '../../../domain/news/models/news';
 import NewsService from '../../../domain/news/services/news';
 import { ApiNewsCategory } from 'ts-newsapi';
 import CategoryCard from '../../components/CategoryCard';
-
+import CustomRefreshControl from '../../components/CustomRefreshControl';
 
 const news = signal<News[]>([])
 const loading = signal(false)
@@ -50,7 +50,7 @@ export default function Home() {
       <Stack.Screen options={{ headerShown: false }} />
       <View style={styles.container}>
         <HorizontalCarousel items={categories} itemGap={15} itemRenderer={(item, key) => (
-          <CategoryCard 
+          <CategoryCard
             categoryName={item}
             isSelected={selectedCategory.value === item}
             onPress={() => {
@@ -70,21 +70,19 @@ export default function Home() {
               )
             }}
             refreshControl={
-              <RefreshControl
-                refreshing={loading.value}
-                onRefresh={() => {
-                  loading.value = true
+              <CustomRefreshControl
+                loading={loading.value}
+                onRefresh={() => {                  
+                  loading.value = true;
                   fetchNews()
                     .then(res => {
                       if (res.news.length > 0) {
-                        news.value = res.news
+                        news.value = res.news;
                       }
-                      loading.value = false
+                      loading.value = false;
                     })
-                    .catch(e => loading.value = false)
+                    .catch(e => loading.value = false);
                 }}
-                colors={['white']}
-                tintColor={'white'}
               />
             }
           />
