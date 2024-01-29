@@ -1,12 +1,10 @@
-import { Link, Stack } from 'expo-router';
+import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { FlatList, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import appStyles from '../../styles';
+import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 
 import HorizontalCarousel from '../../components/HorizontalCarousel';
 import { signal } from '@preact/signals-react';
 import { useContext, useEffect, useMemo } from 'react';
-import { shadeColor } from '../../utils';
 import NewsCard from '../../components/NewsCard';
 import AppState from '../../../aplication/GlobalState';
 import News from '../../../domain/news/models/news';
@@ -14,7 +12,6 @@ import NewsService from '../../../domain/news/services/news';
 import { ApiNewsCategory } from 'ts-newsapi';
 import CategoryCard from '../../components/CategoryCard';
 
-const { smallText, mediumText, whiteText } = appStyles
 
 const news = signal<News[]>([])
 const loading = signal(false)
