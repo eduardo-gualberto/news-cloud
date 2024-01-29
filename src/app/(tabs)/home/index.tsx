@@ -12,6 +12,7 @@ import AppState from '../../../aplication/GlobalState';
 import News from '../../../domain/news/models/news';
 import NewsService from '../../../domain/news/services/news';
 import { ApiNewsCategory } from 'ts-newsapi';
+import CategoryCard from '../../components/CategoryCard';
 
 const { smallText, mediumText, whiteText } = appStyles
 
@@ -51,29 +52,17 @@ export default function Home() {
     <>
       <Stack.Screen options={{ headerShown: false }} />
       <View style={styles.container}>
-        {/* horizontal carousel */}
         <HorizontalCarousel items={categories} itemGap={15} itemRenderer={(item, key) => (
-          <TouchableOpacity
-            key={key}
+          <CategoryCard 
+            categoryName={item}
+            isSelected={selectedCategory.value === item}
             onPress={() => {
               selectedCategory.value = item
             }}
-            style={[
-              styles.categoryCard,
-              { backgroundColor: selectedCategory.value === item ? 'lightgrey' : 'rgba(255,255,255,0.2)' }
-            ]}
-          >
-            <Text style={[
-              smallText,
-              whiteText,
-              { color: selectedCategory.value === item ? 'black' : 'white' }
-            ]}>
-              {item}
-            </Text>
-          </TouchableOpacity>
+            key={key}
+          />
         )} />
 
-        {/* news list rendering */}
         <View style={styles.listContainer}>
           <FlatList
             style={styles.list}
@@ -108,6 +97,7 @@ export default function Home() {
     </>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {
