@@ -1,20 +1,28 @@
 import { StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
-import React, { } from 'react'
+import React, { useContext } from 'react'
 import { Image } from 'expo-image'
 import News from '../../../domain/news/models/news'
 import defaultStyles from '../../styles'
 import { formatPublishedDate } from '../../utils'
 import { Link } from 'expo-router'
+import AppState from '../../../aplication/GlobalState'
 
 
 const { mediumText, whiteText, smallText, dimmedWhiteText } = defaultStyles
 
 const NewsCard = ({ news }: { news: News }) => {
+
+  const { selectNews } = useContext(AppState)
+
   const imageBlurHash =
     '|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[';
 
   return (
-    <Link href={"/(tabs)/home/news-details"} asChild>
+    <Link
+      href={"/(tabs)/home/news-details"}
+      onPress={() => selectNews(news)}
+      asChild
+    >
       <TouchableWithoutFeedback>
         <View style={styles.container}>
           <Image
