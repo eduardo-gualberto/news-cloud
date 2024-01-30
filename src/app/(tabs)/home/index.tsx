@@ -22,26 +22,22 @@ export default function Home() {
   const newsService = useMemo(() => {
     return new NewsService()
   }, [])
-  const fetchNews = () => newsService.getTopHeadlinesForCountryAndCategory('us', selectedCategory.value as ApiNewsCategory)
+
+  const fetchNews = () => newsService
+    .getTopHeadlinesForCountryAndCategory('us', selectedCategory.value as ApiNewsCategory)
+    .then(res => {
+      news.value = res.news
+      loading.value = false
+    })
+    .catch(e => loading.value = false)
 
   const categories = useMemo(() => ['all', 'business', 'entertainment', 'general', 'health', 'science', 'sports', 'technology'], [])
 
   useEffect(() => {
     loading.value = true
-    const interval = setInterval(() => {
-      fetchNews()
-        .then(res => {
-          if (res.news.length > 0) {
-            news.value = res.news
-            loading.value = false
-            return clearInterval(interval)
-          }
-        })
-        .catch(e => loading.value = false)
-    }, 1000)
+    fetchNews()
     return () => {
       loading.value = false
-      clearInterval(interval)
     }
   }, [])
 
@@ -72,16 +68,9 @@ export default function Home() {
             refreshControl={
               <CustomRefreshControl
                 loading={loading.value}
-                onRefresh={() => {                  
+                onRefresh={() => {
                   loading.value = true;
                   fetchNews()
-                    .then(res => {
-                      if (res.news.length > 0) {
-                        news.value = res.news;
-                      }
-                      loading.value = false;
-                    })
-                    .catch(e => loading.value = false);
                 }}
               />
             }
@@ -103,7 +92,6 @@ const styles = StyleSheet.create({
     paddingTop: 50,
   },
   categoryCard: {
-    // height: 35,
     paddingVertical: 7,
     paddingHorizontal: 10,
     borderRadius: 7,

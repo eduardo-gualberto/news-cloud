@@ -1,9 +1,10 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
 import React, { } from 'react'
 import { Image } from 'expo-image'
 import News from '../../../domain/news/models/news'
 import defaultStyles from '../../styles'
 import { formatPublishedDate } from '../../utils'
+import { Link } from 'expo-router'
 
 
 const { mediumText, whiteText, smallText, dimmedWhiteText } = defaultStyles
@@ -13,22 +14,25 @@ const NewsCard = ({ news }: { news: News }) => {
     '|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[';
 
   return (
-    <View style={styles.container}>
-      <Image
-        style={styles.image}
-        source={news.urlToImage}
-        placeholder={imageBlurHash}
-        contentFit="cover"
-        transition={1000}
-      />
-      <Text style={[mediumText, whiteText, { margin: 10 }]}>
-        {news.title}
-      </Text>
-
-      <Text style={[{textAlign: 'left', width: '100%', marginLeft: 30, marginBottom: 10}, dimmedWhiteText, smallText]}>
-        {formatPublishedDate(news.publishedAt)}
-      </Text>
-    </View>
+    <Link href={"/(tabs)/home/news-details"} asChild>
+      <TouchableWithoutFeedback>
+        <View style={styles.container}>
+          <Image
+            style={styles.image}
+            source={news.urlToImage}
+            placeholder={imageBlurHash}
+            contentFit="cover"
+            transition={1000}
+          />
+          <Text style={[mediumText, whiteText, { margin: 10 }]}>
+            {news.title}
+          </Text>
+          <Text style={[{ textAlign: 'left', width: '100%', marginLeft: 30, marginBottom: 10 }, dimmedWhiteText, smallText]}>
+            {formatPublishedDate(news.publishedAt)}
+          </Text>
+        </View>
+      </TouchableWithoutFeedback>
+    </Link>
   )
 }
 
