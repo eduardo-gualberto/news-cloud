@@ -1,16 +1,22 @@
 import { Stack, useNavigation } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { Linking, ScrollView, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
-
 import appStyle from '../../../styles'
 import { useContext } from 'react';
 import AppState from '../../../../aplication/GlobalState';
 import { Image } from 'expo-image';
 import { formatPublishedDate } from '../../../utils';
-import { computed } from '@preact/signals-react';
+import { computed, signal } from '@preact/signals-react';
 import { Ionicons } from "@expo/vector-icons"
+import ErrorModal from '../../../components/Modals/error-modal';
+import logger from '../../../../aplication/Logger';
 
 const { bigText, mediumText, whiteText, smallText, dimmedWhiteText } = appStyle
+
+const modalController = signal({
+  visible: false,
+  errorMsg: ''
+})
 
 export default function NewsDetails() {
   const { selectedNews } = useContext(AppState)
@@ -33,11 +39,15 @@ export default function NewsDetails() {
   const parsedTitle = computed(() => title.split(' - ').slice(0, -1).join(' - '))
 
   const goToUrl = () => {
+    const loggr = logger.extend('NewsDetails.goToUrl')
     Linking.canOpenURL(url)
       .then(supported => {
         if (!supported) {
-          // TODO: handle the error
-          console.log("Can't handle url: " + url);
+          loggr.error('Failed to open URL:\n', url)
+          modalController.value = {
+            visible: true,
+            errorMsg: "Failed to open URL:\n" + url
+          }
         } else {
           return Linking.openURL(url);
         }
@@ -82,6 +92,12 @@ export default function NewsDetails() {
 
         </View>
       </ScrollView>
+      <ErrorModal visible={modalController.value.visible} errorMessage={modalController.value.errorMsg} onClose={() => {
+        modalController.value = {
+          ...modalController.value,
+          visible: false
+        }
+      }} />
       <StatusBar style="auto" />
     </>
   );
