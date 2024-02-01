@@ -1,13 +1,14 @@
-import { Stack } from 'expo-router';
+import { Stack, useNavigation } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { Linking, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Linking, ScrollView, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 
 import appStyle from '../../../styles'
-import { useContext, useEffect } from 'react';
+import { useContext } from 'react';
 import AppState from '../../../../aplication/GlobalState';
 import { Image } from 'expo-image';
 import { formatPublishedDate } from '../../../utils';
 import { computed } from '@preact/signals-react';
+import { Ionicons } from "@expo/vector-icons"
 
 const { bigText, mediumText, whiteText, smallText, dimmedWhiteText } = appStyle
 
@@ -24,12 +25,12 @@ export default function NewsDetails() {
     url,
     description
   } = selectedNews.value
-  
+
   // Removes the '[+1234 chars]' from the content and replaces the newlines with double newlines 
   const parsedContent = computed(() => content.replace(/\[\+\d+ chars\]/, "").replaceAll('\n', '\n\n').trimEnd())
 
   // Removes the last part of the title which is the source name
-  const parsedTitle = computed(() => title.split(' - ').slice(0,-1).join(' - '))
+  const parsedTitle = computed(() => title.split(' - ').slice(0, -1).join(' - '))
 
   const goToUrl = () => {
     Linking.canOpenURL(url)
@@ -46,9 +47,19 @@ export default function NewsDetails() {
   const imageBlurHash =
     '|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[';
 
+  const nav = useNavigation()
+
   return (
     <>
-      <Stack.Screen options={{ headerShown: true, title: source.name }} />
+      <Stack.Screen options={{
+        headerShown: true, title: source.name, headerRight: ({ tintColor }) => {
+          return (
+            <TouchableOpacity onPress={() => nav.goBack()}>
+              <Ionicons name="close" size={30} color="rgba(0,0,0,0.2)" />
+            </TouchableOpacity>
+          )
+        },
+      }} />
       <ScrollView style={styles.container}>
         <View style={styles.contentContainer}>
           <Image
@@ -66,7 +77,7 @@ export default function NewsDetails() {
           </View>
           <Text style={[mediumText, whiteText, { paddingHorizontal: 7, marginBottom: 50 }]}>
             {parsedContent.value}
-            <Text onPress={goToUrl} style={[{color: 'lightblue', textDecorationLine: 'underline'}]}>read more</Text>
+            <Text onPress={goToUrl} style={[{ color: 'lightblue', textDecorationLine: 'underline' }]}>read more</Text>
           </Text>
 
         </View>
