@@ -1,7 +1,7 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
-import appStyle from '../../../ui/styles'
+import appStyle from '@Utils/styles'
 
 const { bigText, whiteText } = appStyle
 

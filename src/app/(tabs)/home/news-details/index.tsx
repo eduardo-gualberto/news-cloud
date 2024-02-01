@@ -1,15 +1,15 @@
 import { Stack, useNavigation } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { Linking, ScrollView, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
-import appStyle from '../../../../ui/styles'
+import appStyle from '@Utils/styles'
 import { useContext } from 'react';
-import AppState from '../../../../aplication/GlobalState';
+import AppState from '@Aplication/GlobalState';
 import { Image } from 'expo-image';
-import { formatPublishedDate } from '../../../../ui/utils';
+import { formatPublishedDate } from '@Utils/utils';
 import { computed, signal } from '@preact/signals-react';
 import { Ionicons } from "@expo/vector-icons"
-import ErrorModal from '../../../../ui/components/Modals/error-modal';
-import logger from '../../../../aplication/Logger';
+import ErrorModal from '@Utils/components/Modals/error-modal';
+import logger from '@Aplication/Logger';
 
 const { bigText, mediumText, whiteText, smallText, dimmedWhiteText } = appStyle
 

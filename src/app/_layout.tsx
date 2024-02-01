@@ -1,8 +1,5 @@
-import { BlurView } from "expo-blur";
 import { Stack, Tabs } from "expo-router";
 import { StyleSheet } from "react-native";
-
-import { Ionicons } from "@expo/vector-icons"
 
 export default function TabsLayout() {
 

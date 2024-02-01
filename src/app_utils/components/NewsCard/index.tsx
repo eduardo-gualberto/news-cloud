@@ -1,11 +1,11 @@
 import { StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
 import React, { useContext } from 'react'
 import { Image } from 'expo-image'
-import News from '../../../domain/news/models/news'
-import defaultStyles from '../../../ui/styles'
-import { formatPublishedDate } from '../../../ui/utils'
+import News from '@Domain/news/models/news'
+import defaultStyles from '@Utils/styles'
+import { formatPublishedDate } from '@Utils/utils'
 import { Link } from 'expo-router'
-import AppState from '../../../aplication/GlobalState'
+import AppState from '@Aplication/GlobalState'
 
 
 const { mediumText, whiteText, smallText, dimmedWhiteText } = defaultStyles

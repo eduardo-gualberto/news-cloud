@@ -1,6 +1,6 @@
 import { Redirect, Stack } from 'expo-router';
-import AppState from '../aplication/GlobalState';
-import state from '../aplication/GlobalState/state';
+import AppState from '@Aplication/GlobalState';
+import state from '@Aplication/GlobalState/state';
 
 export default function index() {
   return (
