@@ -2,8 +2,8 @@ import { StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } fr
 import React, { useContext } from 'react'
 import { Image } from 'expo-image'
 import News from '../../../domain/news/models/news'
-import defaultStyles from '../../styles'
-import { formatPublishedDate } from '../../utils'
+import defaultStyles from '../../../ui/styles'
+import { formatPublishedDate } from '../../../ui/utils'
 import { Link } from 'expo-router'
 import AppState from '../../../aplication/GlobalState'
 

@@ -1,6 +1,6 @@
 import { StyleSheet, Text, TouchableHighlight, View } from 'react-native'
 import React from 'react'
-import defaultStyles from '../../styles'
+import defaultStyles from '../../../ui/styles'
 
 const { smallText, whiteText } = defaultStyles
 

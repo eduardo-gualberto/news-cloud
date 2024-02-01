@@ -23,7 +23,8 @@ export default function TabsLayout() {
                     paddingBottom: 10,
                     marginHorizontal: '25%',
                     position: 'absolute',
-                    backgroundColor: 'transparent'
+                    backgroundColor: 'transparent',
+                    bottom: 20
                 },
             }}
         >

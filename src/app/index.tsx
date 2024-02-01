@@ -1,4 +1,4 @@
-import { Redirect } from 'expo-router';
+import { Redirect, Stack } from 'expo-router';
 import AppState from '../aplication/GlobalState';
 import state from '../aplication/GlobalState/state';
 

@@ -2,16 +2,16 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 
-import HorizontalCarousel from '../../components/HorizontalCarousel';
+import HorizontalCarousel from '../../../ui/components/HorizontalCarousel';
 import { signal } from '@preact/signals-react';
 import { useContext, useEffect, useMemo } from 'react';
-import NewsCard from '../../components/NewsCard';
+import NewsCard from '../../../ui/components/NewsCard';
 import AppState from '../../../aplication/GlobalState';
 import News from '../../../domain/news/models/news';
 import NewsService from '../../../domain/news/services/news';
 import { ApiNewsCategory } from 'ts-newsapi';
-import CategoryCard from '../../components/CategoryCard';
-import CustomRefreshControl from '../../components/CustomRefreshControl';
+import CategoryCard from '../../../ui/components/CategoryCard';
+import CustomRefreshControl from '../../../ui/components/CustomRefreshControl';
 
 const news = signal<News[]>([])
 const loading = signal(false)
