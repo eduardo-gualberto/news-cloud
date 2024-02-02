@@ -12,7 +12,7 @@ const { mediumText, whiteText, smallText, dimmedWhiteText } = defaultStyles
 
 const NewsCard = ({ news }: { news: News }) => {
 
-  const { selectNews } = useContext(AppState)
+  const { selectedNews } = useContext(AppState)
 
   const imageBlurHash =
     '|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[';
@@ -20,7 +20,7 @@ const NewsCard = ({ news }: { news: News }) => {
   return (
     <Link
       href={"/(tabs)/home/news-details"}
-      onPress={() => selectNews(news)}
+      onPress={() => selectedNews.value = news}
       asChild
     >
       <TouchableWithoutFeedback>

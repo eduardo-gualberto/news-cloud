@@ -4,14 +4,11 @@ import News from "../../domain/news/models/news"
 const createAppState = () => {
     const selectedCategory = signal('all')
     const selectedNews = signal<News>({} as News)
-    const selectNews = (news: News) => {
-        selectedNews.value = news
-    }
-    
+    const fetchedNews = signal<News[]>([])
     return {
         selectedCategory,
         selectedNews,
-        selectNews
+        fetchedNews,
     }
 }
 

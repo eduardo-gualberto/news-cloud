@@ -10,14 +10,12 @@ import NewsCard from '@Components/NewsCard';
 import CategoryCard from '@Components/CategoryCard';
 import CustomRefreshControl from '@Components/CustomRefreshControl';
 import AppState from '@Aplication/GlobalState';
-import News from '@Domain/news/models/news';
 import NewsService from '@Domain/news/services/news';
 
-const news = signal<News[]>([])
 const loading = signal(false)
 
 export default function Home() {
-  const { selectedCategory } = useContext(AppState)
+  const { selectedCategory, fetchedNews } = useContext(AppState)
 
   const newsService = useMemo(() => {
     return new NewsService()
@@ -26,7 +24,7 @@ export default function Home() {
   const fetchNews = () => newsService
     .getTopHeadlinesForCountryAndCategory('us', selectedCategory.value as ApiNewsCategory)
     .then(res => {
-      news.value = res.news
+      fetchedNews.value = res.news
       loading.value = false
     })
     .catch(e => loading.value = false)
@@ -59,7 +57,7 @@ export default function Home() {
         <View style={styles.listContainer}>
           <FlatList
             style={styles.list}
-            data={news.value}
+            data={fetchedNews.value}
             renderItem={({ item }) => {
               return (
                 <NewsCard news={item} />
