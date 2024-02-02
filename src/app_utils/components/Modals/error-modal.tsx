@@ -1,5 +1,6 @@
 import React from "react";
-import { Modal, Text, TouchableOpacity, View, StyleSheet } from "react-native";
+import { Modal, Text, View, StyleSheet } from "react-native";
+import { Button } from '@rneui/themed'
 
 interface ErrorModalProps {
     errorMessage: string;
@@ -13,9 +14,9 @@ const ErrorModal: React.FC<ErrorModalProps> = ({ errorMessage, onClose, visible 
             <View style={styles.modalContainer}>
                 <View style={[styles.modalContent, { width: "80%" }]}>
                     <Text style={styles.errorMessage}>{errorMessage}</Text>
-                    <TouchableOpacity style={[styles.closeButton, { marginTop: "auto", alignSelf: "flex-end" }]} onPress={onClose}>
-                        <Text style={styles.closeButtonText}>Close</Text>
-                    </TouchableOpacity>
+                    <View style={{ alignSelf: 'flex-end' }}>
+                        <Button onPress={onClose} type="clear" size="lg" titleStyle={{ color: 'red' }}>Close</Button>
+                    </View>
                 </View>
             </View>
         </Modal>
@@ -40,7 +41,7 @@ const styles = StyleSheet.create({
     },
     errorMessage: {
         fontSize: 16,
-        marginBottom: 20,
+        marginBottom: 10,
         textAlign: "center",
     },
     closeButton: {
