@@ -11,6 +11,7 @@ import CategoryCard from '@Components/CategoryCard';
 import CustomRefreshControl from '@Components/CustomRefreshControl';
 import AppState from '@Aplication/GlobalState';
 import NewsService from '@Domain/news/services/news';
+import News from '@Domain/news/models/news';
 
 const loading = signal(false)
 
@@ -24,8 +25,13 @@ export default function Home() {
   const fetchNews = () => newsService
     .getTopHeadlinesForCountryAndCategory('us', selectedCategory.value as ApiNewsCategory)
     .then(res => {
-      fetchedNews.value = res.news
-      loading.value = false
+      if (res.news.length === 0) {
+        fetchedNews.value = News.fromMock()
+        loading.value = false
+      } else {
+        fetchedNews.value = res.news
+        loading.value = false
+      }
     })
     .catch(e => loading.value = false)
 

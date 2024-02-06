@@ -48,11 +48,14 @@ export default class News {
             return newsMock.articles.map(article => new News(article))
         }
         if (response.totalResults === 0) {
-            loggr.warn(`No results found. Using a mock instead.`)
-            return newsMock.articles.map(article => new News(article))
+            loggr.warn(`No results found.`)
+            return []
         }
 
         return response.articles.map(article => new News(article))
     }
 
+    static fromMock(): News[] {
+        return newsMock.articles.map(article => new News(article))
+    }
 }

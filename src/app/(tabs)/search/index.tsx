@@ -1,19 +1,64 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { Platform, StyleSheet, Text, TextInput, View } from 'react-native';
+import { FlatList, Platform, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SearchBar } from '@rneui/themed'
 import { SearchBarProps } from '@rneui/base'
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { signal } from '@preact/signals-react';
-import { PropsWithChildren, useRef } from 'react';
+import { PropsWithChildren, useMemo, useRef } from 'react';
+import NewsService from '@Domain/news/services/news';
+import News from '@Domain/news/models/news';
+import logger from '@Aplication/Logger';
+import ErrorModal from '@Utils/components/Modals/error-modal';
+import NewsCard from '@Utils/components/NewsCard';
+import CustomRefreshControl from '@Utils/components/CustomRefreshControl';
 
 type SearchBarRefType = TextInput & PropsWithChildren<SearchBarProps>
 
 const searchText = signal('')
+const searchedNews = signal([] as News[])
+const modalController = signal({
+  visible: false,
+  errorMsg: ''
+})
+const loading = signal(false)
 
 export default function Search() {
-
+  const newsService = useMemo(() => {
+    return new NewsService()
+  }, [])
   const searchBarRef = useRef<SearchBarRefType>(null)
+
+  const searchForNews = (text: string) => {
+    const loggr = logger.extend('Search.searchForNews')
+    const formattedText = text.split(' ')
+
+    loading.value = true
+
+    newsService
+      .getEverythingForQueryAndLanguage(formattedText, 'en')
+      .then((news) => {
+        if (news.news.length === 0) {
+          loggr.info('No news found for query: ', formattedText, "\nReturning mock data")
+          modalController.value = {
+            visible: true,
+            errorMsg: "No news found for query: " + formattedText
+          }
+          searchedNews.value = News.fromMock()
+        } else {
+          searchedNews.value = news.news
+        }
+        loading.value = false
+      })
+      .catch((error) => {
+        loading.value = false
+        loggr.error('Failed to fetch news for query:\n', formattedText, '\nError:\n', error)
+        modalController.value = {
+          visible: true,
+          errorMsg: "Failed to fetch news for query:\n" + formattedText
+        }
+      })
+  }
 
   return (
     <>
@@ -29,12 +74,39 @@ export default function Search() {
           round
           onChangeText={(text) => { searchText.value = text }}
           onEndEditing={({ nativeEvent }) => {
-            // trigger search
-            console.log("nativeEvent.text", nativeEvent.text)
+            searchForNews(nativeEvent.text)
           }}
         />
-
-
+        <View style={styles.listContainer}>
+          <FlatList
+            style={styles.list}
+            data={searchedNews.value}
+            renderItem={({ item }) => {
+              return (
+                <NewsCard news={item}/>
+              )
+            }}
+            refreshControl={
+              <CustomRefreshControl
+                loading={loading.value}
+                onRefresh={() => {
+                  loading.value = true;
+                  searchForNews(searchText.value)
+                }}
+              />
+            }
+          />
+        </View>
+        <ErrorModal
+          errorMessage={modalController.value.errorMsg}
+          visible={modalController.value.visible}
+          onClose={() => {
+            modalController.value = {
+              visible: false,
+              errorMsg: ''
+            }
+          }}
+        />
         <StatusBar style="auto" />
       </SafeAreaView>
     </>
@@ -49,4 +121,13 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     height: '100%',
   },
+  listContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+  }, list: {
+    flex: 1,
+    width: '90%',
+  }
 });
