@@ -1,17 +1,19 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { FlatList, StyleSheet, View } from 'react-native';
+import { FlatList, StyleSheet, View, Text } from 'react-native';
 import { ApiNewsCategory } from 'ts-newsapi';
 import { signal } from '@preact/signals-react';
 import { useContext, useEffect, useMemo } from 'react';
 
-import HorizontalCarousel from '@Components/HorizontalCarousel';
 import NewsCard from '@Components/NewsCard';
-import CategoryCard from '@Components/CategoryCard';
 import CustomRefreshControl from '@Components/CustomRefreshControl';
 import AppState from '@Aplication/GlobalState';
 import NewsService from '@Domain/news/services/news';
 import News from '@Domain/news/models/news';
+import globalStyles from '@Utils/styles';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+const { bigText, mediumText, whiteText, dimmedWhiteText } = globalStyles
 
 const loading = signal(false)
 
@@ -48,25 +50,20 @@ export default function Home() {
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
-      <View style={styles.container}>
-        <HorizontalCarousel items={categories} itemGap={15} itemRenderer={(item, key) => (
-          <CategoryCard
-            categoryName={item}
-            isSelected={selectedCategory.value === item}
-            onPress={() => {
-              selectedCategory.value = item
-            }}
-            key={key}
-          />
-        )} />
-
+      <SafeAreaView style={styles.container}>
         <View style={styles.listContainer}>
           <FlatList
             style={styles.list}
             data={fetchedNews.value}
+            ListHeaderComponent={() => (
+              <View style={{ marginBottom: 30, flex: 0, alignItems: 'flex-start', width: '100%', padding: 0 }}>
+                <Text style={[bigText, whiteText, { fontWeight: '800' }]}>top headlines</Text>
+                <Text style={[mediumText, dimmedWhiteText, { fontWeight: '900' }]}>of the day</Text>
+              </View>
+            )}
             renderItem={({ item }) => {
               return (
-                <NewsCard news={item} />
+                <NewsCard news={item} isCompact={false} />
               )
             }}
             refreshControl={
@@ -81,7 +78,7 @@ export default function Home() {
           />
         </View>
         <StatusBar style="auto" />
-      </View>
+      </SafeAreaView>
     </>
   );
 }
@@ -93,7 +90,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#222',
     alignItems: 'center',
     justifyContent: 'flex-start',
-    paddingTop: 50,
+    paddingTop: 20,
   },
   categoryCard: {
     paddingVertical: 7,

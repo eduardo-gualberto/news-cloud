@@ -35,9 +35,6 @@ export default function NewsDetails() {
   // Removes the '[+1234 chars]' from the content and replaces the newlines with double newlines 
   const parsedContent = computed(() => content.replace(/\[\+\d+ chars\]/, "").replaceAll('\n', '\n\n').trimEnd())
 
-  // Removes the last part of the title which is the source name
-  const parsedTitle = computed(() => title.split(' - ').slice(0, -1).join(' - '))
-
   const goToUrl = () => {
     const loggr = logger.extend('NewsDetails.goToUrl')
     Linking.canOpenURL(url)
@@ -79,7 +76,7 @@ export default function NewsDetails() {
             contentFit="cover"
             transition={1000}
           />
-          <Text style={[bigText, whiteText, { fontWeight: '900', paddingHorizontal: 7 }]}>{parsedTitle}</Text>
+          <Text style={[bigText, whiteText, { fontWeight: '900', paddingHorizontal: 7 }]}>{title}</Text>
           <Text style={[mediumText, whiteText, { paddingHorizontal: 7 }]}>{description}</Text>
           <View style={[styles.detailsContainer]}>
             <Text style={[smallText, dimmedWhiteText]}> {author} </Text>

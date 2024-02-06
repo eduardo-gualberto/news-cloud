@@ -1,17 +1,20 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { FlatList, Platform, StyleSheet, Text, TextInput, View } from 'react-native';
+import { FlatList, StyleSheet, TextInput, View } from 'react-native';
 import { SearchBar } from '@rneui/themed'
 import { SearchBarProps } from '@rneui/base'
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { signal } from '@preact/signals-react';
-import { PropsWithChildren, useMemo, useRef } from 'react';
+import { PropsWithChildren, useContext, useMemo, useRef } from 'react';
 import NewsService from '@Domain/news/services/news';
 import News from '@Domain/news/models/news';
 import logger from '@Aplication/Logger';
 import ErrorModal from '@Utils/components/Modals/error-modal';
 import NewsCard from '@Utils/components/NewsCard';
 import CustomRefreshControl from '@Utils/components/CustomRefreshControl';
+import CategoryCard from '@Utils/components/CategoryCard';
+import HorizontalCarousel from '@Utils/components/HorizontalCarousel';
+import AppState from '@Aplication/GlobalState';
 
 type SearchBarRefType = TextInput & PropsWithChildren<SearchBarProps>
 
@@ -24,9 +27,12 @@ const modalController = signal({
 const loading = signal(false)
 
 export default function Search() {
+  const { selectedCategory } = useContext(AppState)
+  
   const newsService = useMemo(() => {
     return new NewsService()
   }, [])
+  const categories = useMemo(() => ['all', 'business', 'entertainment', 'general', 'health', 'science', 'sports', 'technology'], [])
   const searchBarRef = useRef<SearchBarRefType>(null)
 
   const searchForNews = (text: string) => {
@@ -77,13 +83,24 @@ export default function Search() {
             searchForNews(nativeEvent.text)
           }}
         />
+        <HorizontalCarousel items={categories} itemGap={15} itemRenderer={(item, key) => (
+          <CategoryCard
+            categoryName={item}
+            isSelected={selectedCategory.value === item}
+            onPress={() => {
+              selectedCategory.value = item
+            }}
+            key={key}
+          />
+        )} />
+
         <View style={styles.listContainer}>
           <FlatList
             style={styles.list}
             data={searchedNews.value}
             renderItem={({ item }) => {
               return (
-                <NewsCard news={item}/>
+                <NewsCard news={item} isCompact={true}/>
               )
             }}
             refreshControl={

@@ -10,7 +10,7 @@ import AppState from '@Aplication/GlobalState'
 
 const { mediumText, whiteText, smallText, dimmedWhiteText } = defaultStyles
 
-const NewsCard = ({ news }: { news: News }) => {
+const NewsCard = ({ news, isCompact }: { news: News, isCompact: boolean }) => {
 
   const { selectedNews } = useContext(AppState)
 
@@ -25,13 +25,14 @@ const NewsCard = ({ news }: { news: News }) => {
     >
       <TouchableWithoutFeedback>
         <View style={styles.container}>
-          <Image
-            style={styles.image}
-            source={news.urlToImage}
-            placeholder={imageBlurHash}
-            contentFit="cover"
-            transition={1000}
-          />
+          {!isCompact &&
+            <Image
+              style={styles.image}
+              source={news.urlToImage}
+              placeholder={imageBlurHash}
+              contentFit="cover"
+              transition={1000}
+            />}
           <Text style={[mediumText, whiteText, { margin: 10 }]}>
             {news.title}
           </Text>
