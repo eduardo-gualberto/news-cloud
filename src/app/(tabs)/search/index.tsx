@@ -1,6 +1,6 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { FlatList, StyleSheet, TextInput, View } from 'react-native';
+import { FlatList, StyleSheet, TextInput, View, Text } from 'react-native';
 import { SearchBar } from '@rneui/themed'
 import { SearchBarProps } from '@rneui/base'
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -28,11 +28,11 @@ const loading = signal(false)
 
 export default function Search() {
   const { selectedCategory } = useContext(AppState)
-  
+
   const newsService = useMemo(() => {
     return new NewsService()
   }, [])
-  const categories = useMemo(() => ['all', 'business', 'entertainment', 'general', 'health', 'science', 'sports', 'technology'], [])
+  const categories = useMemo(() => ['general', 'business', 'entertainment', 'health', 'science', 'sports', 'technology'], [])
   const searchBarRef = useRef<SearchBarRefType>(null)
 
   const searchForNews = (text: string) => {
@@ -98,15 +98,30 @@ export default function Search() {
           <FlatList
             style={styles.list}
             data={searchedNews.value}
+            ListHeaderComponent={() => (
+              <View>
+                <Text style={{ color: 'white' }}>
+                  header view component
+                </Text>
+              </View>
+            )}
+            ListEmptyComponent={() => (
+              <View>
+                <Text style={{ color: 'white' }}>
+                  empty view component
+                </Text>
+              </View>
+            )}
             renderItem={({ item }) => {
               return (
-                <NewsCard news={item} isCompact={true}/>
+                <NewsCard news={item} isCompact={true} />
               )
             }}
             refreshControl={
               <CustomRefreshControl
                 loading={loading.value}
                 onRefresh={() => {
+                  if (searchText.value.trim().length === 0) return
                   loading.value = true;
                   searchForNews(searchText.value)
                 }}

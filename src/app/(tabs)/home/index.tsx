@@ -18,14 +18,14 @@ const { bigText, mediumText, whiteText, dimmedWhiteText } = globalStyles
 const loading = signal(false)
 
 export default function Home() {
-  const { selectedCategory, fetchedNews } = useContext(AppState)
+  const { fetchedNews } = useContext(AppState)
 
   const newsService = useMemo(() => {
     return new NewsService()
   }, [])
 
   const fetchNews = () => newsService
-    .getTopHeadlinesForCountryAndCategory('us', selectedCategory.value as ApiNewsCategory)
+    .getTopHeadlinesForCountryAndCategory('us', 'general')
     .then(res => {
       if (res.news.length === 0) {
         fetchedNews.value = News.fromMock()
