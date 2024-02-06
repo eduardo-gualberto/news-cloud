@@ -4,7 +4,12 @@ import { StyleSheet } from "react-native";
 export default function TabsLayout() {
 
     return (
-        <Stack screenOptions={{ headerShown: false }}/>
+        <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="news-details" options={{
+                presentation: 'modal',
+                headerShown: false
+            }} />
+        </Stack>
     )
 }
 

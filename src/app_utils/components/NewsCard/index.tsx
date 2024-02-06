@@ -19,7 +19,7 @@ const NewsCard = ({ news }: { news: News }) => {
 
   return (
     <Link
-      href={"/(tabs)/home/news-details"}
+      href={"/news-details"}
       onPress={() => selectedNews.value = news}
       asChild
     >
