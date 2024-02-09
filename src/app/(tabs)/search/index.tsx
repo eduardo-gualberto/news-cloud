@@ -1,14 +1,12 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { FlatList, StyleSheet, TextInput, View, Text } from 'react-native';
+import { FlatList, StyleSheet, TextInput, View } from 'react-native';
 import { SearchBar } from '@rneui/themed'
 import { SearchBarProps } from '@rneui/base'
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { effect, signal } from '@preact/signals-react';
 import { PropsWithChildren, useContext, useMemo, useRef } from 'react';
 import NewsService from '@Domain/news/services/news';
-import News from '@Domain/news/models/news';
-import logger from '@Aplication/Logger';
 import ErrorModal from '@Utils/components/Modals/error-modal';
 import NewsCard from '@Utils/components/NewsCard';
 import CustomRefreshControl from '@Utils/components/CustomRefreshControl';
@@ -17,6 +15,8 @@ import HorizontalCarousel from '@Utils/components/HorizontalCarousel';
 import AppState from '@Aplication/GlobalState';
 import usePagination from '@Utils/hooks/use-pagination';
 import EmptyListView from '@Utils/components/EmptyListView';
+import SourcesServices from '@Domain/sources/services/sources';
+import { ApiNewsCategory } from 'ts-newsapi';
 
 type SearchBarRefType = TextInput & PropsWithChildren<SearchBarProps>
 
@@ -27,19 +27,47 @@ const modalController = signal({
 })
 
 export default function Search() {
-  const { selectedCategory } = useContext(AppState)
+  const { selectedCategory, categorySources } = useContext(AppState)
 
   const newsService = useMemo(() => {
     return new NewsService()
   }, [])
 
-  const { loading, data, fetchMore, error } = usePagination((page: number, pageSize: number) => {
-    console.log('fetching page', page, 'with size', pageSize, 'for query', searchText.value.split(' '))
+  const sourcesService = useMemo(() => {
+    return new SourcesServices()
+  }, [])
 
+  const { loading, data, fetchMore, error } = usePagination((page: number, pageSize: number) => {
     return newsService
       .getEverythingForQueryAndLanguage(searchText.value.split(' '), 'en', page, pageSize)
       .then(news => news.news)
   }, false, 20, 1)
+
+  const fetchCategoryData = (category: ApiNewsCategory) => {
+    if (categorySources.value[category] !== undefined) return Promise.resolve()
+
+    return sourcesService.getSourcesByCategory(category)
+      .then(sources => {
+        categorySources.value[category] = sources
+      })
+      .catch(err => {
+        modalController.value = {
+          visible: true,
+          errorMsg: err.message
+        }
+      })
+  }
+
+  const onSelectedCategory = (category: ApiNewsCategory) => {
+    selectedCategory.value = category
+    fetchCategoryData(category)
+      .then(() => {
+        const allowedSources = categorySources.peek()[category]!.map(source => source.id)
+        const filteredData = data.peek().filter(news => news.source.id && allowedSources.includes(news.source.id))
+
+        data.value = filteredData
+      })
+  }
 
   const categories = useMemo(() => ['general', 'business', 'entertainment', 'health', 'science', 'sports', 'technology'], [])
   const searchBarRef = useRef<SearchBarRefType>(null)
@@ -75,7 +103,7 @@ export default function Search() {
             categoryName={item}
             isSelected={selectedCategory.value === item}
             onPress={() => {
-              selectedCategory.value = item
+              onSelectedCategory(item as ApiNewsCategory)
             }}
             key={key}
           />
