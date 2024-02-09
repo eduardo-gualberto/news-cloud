@@ -1,51 +1,40 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { FlatList, StyleSheet, View, Text } from 'react-native';
-import { ApiNewsCategory } from 'ts-newsapi';
-import { signal } from '@preact/signals-react';
-import { useContext, useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import NewsCard from '@Components/NewsCard';
 import CustomRefreshControl from '@Components/CustomRefreshControl';
-import AppState from '@Aplication/GlobalState';
 import NewsService from '@Domain/news/services/news';
-import News from '@Domain/news/models/news';
 import globalStyles from '@Utils/styles';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import usePagination from '@Utils/hooks/use-pagination';
+import { effect, signal } from '@preact/signals-react';
 
 const { bigText, mediumText, whiteText, dimmedWhiteText } = globalStyles
 
-const loading = signal(false)
+const stopPagination = signal(false)
 
 export default function Home() {
-  const { fetchedNews } = useContext(AppState)
-
   const newsService = useMemo(() => {
     return new NewsService()
   }, [])
 
-  const fetchNews = () => newsService
-    .getTopHeadlinesForCountryAndCategory('us', 'general')
-    .then(res => {
-      if (res.news.length === 0) {
-        fetchedNews.value = News.fromMock()
-        loading.value = false
-      } else {
-        fetchedNews.value = res.news
-        loading.value = false
-      }
-    })
-    .catch(e => loading.value = false)
-
-  const categories = useMemo(() => ['all', 'business', 'entertainment', 'general', 'health', 'science', 'sports', 'technology'], [])
+  const { data, error, fetchMore, loading } = usePagination((p: number, ps: number) => {
+    return newsService
+      .getTopHeadlinesForCountryAndCategory('us', 'general', p, ps)
+      .then(res => res.news)
+  }, stopPagination.value, 20, 1)
 
   useEffect(() => {
-    loading.value = true
-    fetchNews()
-    return () => {
-      loading.value = false
-    }
+    fetchMore()
   }, [])
+
+  effect(() => {
+    if (error.value) {
+      stopPagination.value = true
+    }
+  })
 
   return (
     <>
@@ -54,7 +43,7 @@ export default function Home() {
         <View style={styles.listContainer}>
           <FlatList
             style={styles.list}
-            data={fetchedNews.value}
+            data={data.value}
             ListHeaderComponent={() => (
               <View style={{ marginBottom: 30, flex: 0, alignItems: 'flex-start', width: '100%', padding: 0 }}>
                 <Text style={[bigText, whiteText, { fontWeight: '800' }]}>top headlines</Text>
@@ -70,11 +59,13 @@ export default function Home() {
               <CustomRefreshControl
                 loading={loading.value}
                 onRefresh={() => {
-                  loading.value = true;
-                  fetchNews()
+                  fetchMore()
                 }}
               />
             }
+            onEndReached={() => {
+              fetchMore()
+            }}
           />
         </View>
         <StatusBar style="auto" />

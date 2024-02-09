@@ -1,5 +1,5 @@
 import { INewsApiArticle, INewsApiResponse, INewsApiSource } from "ts-newsapi";
-import logger from "../../../aplication/Logger";
+import logger  from "@Aplication/Logger";
 import newsMock from './mock'
 
 const defaults = {
