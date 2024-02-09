@@ -1,4 +1,4 @@
-import NewsAPI, { INewsApiTopHeadlinesParams, INewsApiEverythingParams, INewsApiResponse } from 'ts-newsapi'
+import NewsAPI, { INewsApiTopHeadlinesParams, INewsApiEverythingParams } from 'ts-newsapi'
 import BaseRepository from '../../shared/BaseRepository';
 import News from '../models/news';
 
