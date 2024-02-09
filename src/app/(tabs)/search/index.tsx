@@ -4,7 +4,7 @@ import { FlatList, StyleSheet, TextInput, View, Text } from 'react-native';
 import { SearchBar } from '@rneui/themed'
 import { SearchBarProps } from '@rneui/base'
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { signal } from '@preact/signals-react';
+import { effect, signal } from '@preact/signals-react';
 import { PropsWithChildren, useContext, useMemo, useRef } from 'react';
 import NewsService from '@Domain/news/services/news';
 import News from '@Domain/news/models/news';
@@ -15,16 +15,16 @@ import CustomRefreshControl from '@Utils/components/CustomRefreshControl';
 import CategoryCard from '@Utils/components/CategoryCard';
 import HorizontalCarousel from '@Utils/components/HorizontalCarousel';
 import AppState from '@Aplication/GlobalState';
+import usePagination from '@Utils/hooks/use-pagination';
+import EmptyListView from '@Utils/components/EmptyListView';
 
 type SearchBarRefType = TextInput & PropsWithChildren<SearchBarProps>
 
 const searchText = signal('')
-const searchedNews = signal([] as News[])
 const modalController = signal({
   visible: false,
   errorMsg: ''
 })
-const loading = signal(false)
 
 export default function Search() {
   const { selectedCategory } = useContext(AppState)
@@ -32,40 +32,26 @@ export default function Search() {
   const newsService = useMemo(() => {
     return new NewsService()
   }, [])
+
+  const { loading, data, fetchMore, error } = usePagination((page: number, pageSize: number) => {
+    console.log('fetching page', page, 'with size', pageSize, 'for query', searchText.value.split(' '))
+
+    return newsService
+      .getEverythingForQueryAndLanguage(searchText.value.split(' '), 'en', page, pageSize)
+      .then(news => news.news)
+  }, false, 20, 1)
+
   const categories = useMemo(() => ['general', 'business', 'entertainment', 'health', 'science', 'sports', 'technology'], [])
   const searchBarRef = useRef<SearchBarRefType>(null)
 
-  const searchForNews = (text: string) => {
-    const loggr = logger.extend('Search.searchForNews')
-    const formattedText = text.split(' ')
-
-    loading.value = true
-
-    newsService
-      .getEverythingForQueryAndLanguage(formattedText, 'en')
-      .then((news) => {
-        if (news.news.length === 0) {
-          loggr.info('No news found for query: ', formattedText, "\nReturning mock data")
-          modalController.value = {
-            visible: true,
-            errorMsg: "No news found for query: " + formattedText
-          }
-          searchedNews.value = News.fromMock()
-        } else {
-          searchedNews.value = news.news
-        }
-        loading.value = false
-      })
-      .catch((error) => {
-        loading.value = false
-        loggr.error('Failed to fetch news for query:\n', formattedText, '\nError:\n', error)
-        modalController.value = {
-          visible: true,
-          errorMsg: "Failed to fetch news for query:\n" + formattedText
-        }
-      })
-  }
-
+  effect(() => {
+    // empty the list out if the search text cleared
+    if (searchText.value.trim().length === 0
+      && data.value.length !== 0
+      && loading.value === false) {
+      data.value = []
+    }
+  })
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
@@ -80,7 +66,8 @@ export default function Search() {
           round
           onChangeText={(text) => { searchText.value = text }}
           onEndEditing={({ nativeEvent }) => {
-            searchForNews(nativeEvent.text)
+            if (searchText.value.trim().length === 0) return
+            fetchMore()
           }}
         />
         <HorizontalCarousel items={categories} itemGap={15} itemRenderer={(item, key) => (
@@ -97,20 +84,10 @@ export default function Search() {
         <View style={styles.listContainer}>
           <FlatList
             style={styles.list}
-            data={searchedNews.value}
-            ListHeaderComponent={() => (
-              <View>
-                <Text style={{ color: 'white' }}>
-                  header view component
-                </Text>
-              </View>
-            )}
+            data={data.value}
+            contentContainerStyle={{ flexGrow: 1 }}
             ListEmptyComponent={() => (
-              <View>
-                <Text style={{ color: 'white' }}>
-                  empty view component
-                </Text>
-              </View>
+              <EmptyListView />
             )}
             renderItem={({ item }) => {
               return (
@@ -122,11 +99,14 @@ export default function Search() {
                 loading={loading.value}
                 onRefresh={() => {
                   if (searchText.value.trim().length === 0) return
-                  loading.value = true;
-                  searchForNews(searchText.value)
+                  fetchMore()
                 }}
               />
             }
+            onEndReached={() => {
+              if (searchText.value.trim().length === 0) return
+              fetchMore()
+            }}
           />
         </View>
         <ErrorModal
