@@ -37,22 +37,8 @@ export default class News {
         this.urlToImage = json.urlToImage ?? defaults.urlToImage
     }
 
-    static fromApiResponse(response: INewsApiResponse & { message?: string }): News[] {  
-        const loggr = logger.extend('News.fromApiResponse')     
-        if (response.code === "rateLimited") {
-            loggr.warn(`NewsAPI imposed a rate limit for the app, using a mock instead.`)
-            return newsMock.articles.map(article => new News(article))
-        }
-        if (response.status === "error") {
-            loggr.error(`API error: ${response.message!}. Using a mock instead.`)
-            return newsMock.articles.map(article => new News(article))
-        }
-        if (response.totalResults === 0) {
-            loggr.warn(`No results found.`)
-            return []
-        }
-
-        return response.articles.map(article => new News(article))
+    static fromApiResponse(response: INewsApiArticle[]): News[] {  
+        return response.map(article => new News(article))
     }
 
     static fromMock(): News[] {
