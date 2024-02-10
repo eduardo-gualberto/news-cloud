@@ -4,6 +4,9 @@ import logger  from "@Aplication/Logger";
 export default function usePagination<T>(request: (page: number, pageSize: number) => Promise<T[]>, kill: boolean, pagesize = 20, initialPage = 1) {
     const loggr = logger.extend('Home.usePagination')
     
+    console.log('usePagination');
+    
+
     const page = useSignal(initialPage)
     const pageSize = useSignal(pagesize)
     const data = useSignal<T[]>([])
@@ -26,12 +29,19 @@ export default function usePagination<T>(request: (page: number, pageSize: numbe
             })
     }
 
+    const reset = () => {
+        page.value = initialPage
+        data.value = []
+        hasMore.value = true
+    }
+
     if (kill) {
         loggr.warn(`Pagination stopped.`)     
         hasMore.value = false
     }
 
     return {
+        reset,
         page,
         pageSize,
         data,

@@ -2,6 +2,7 @@ import { ApiNewsCategory, ApiNewsCountry, ApiNewsLanguage } from "ts-newsapi";
 import NewsRemoteRepository from "../repositories/news-remote";
 import News from "../models/news";
 import { NewsError } from "../models/news-error";
+import Sources from "@Domain/sources/models/sources";
 
 type NewsServiceResponse = {
     news: News[]
@@ -55,15 +56,14 @@ export default class NewsService {
             })
     }
 
-    getEverythingForQueryAndLanguageDated(from: string, to: string, query: string[], language: ApiNewsLanguage, page: number = 1, pageSize = 100): Promise<NewsServiceResponse> {
-        const formattedQueryString = query?.filter(word => word.length > 3).join(' OR ')
+    getEverythingForQueryAndLanguageAndSources(query: string[], language: ApiNewsLanguage, sources: Sources[], page: number = 1, pageSize = 100): Promise<NewsServiceResponse> {
+        const formattedQueryString = query?.filter(word => word.length > 3).join(' OR ')        
         return this.newsRemoteRepository.fetch({
             shouldFallbackToMock: this.shouldFallbackToMock,
             everything: {
                 q: formattedQueryString,
+                sources: sources.map(source => source.id),
                 language,
-                from,
-                to,
                 page,
                 pageSize,
             }

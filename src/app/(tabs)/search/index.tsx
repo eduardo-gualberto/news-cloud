@@ -4,8 +4,8 @@ import { FlatList, StyleSheet, TextInput, View } from 'react-native';
 import { SearchBar } from '@rneui/themed'
 import { SearchBarProps } from '@rneui/base'
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { effect, signal } from '@preact/signals-react';
-import { PropsWithChildren, useContext, useMemo, useRef } from 'react';
+import { computed, effect, signal } from '@preact/signals-react';
+import { PropsWithChildren, useContext, useEffect, useMemo, useRef } from 'react';
 import NewsService from '@Domain/news/services/news';
 import ErrorModal from '@Utils/components/Modals/error-modal';
 import NewsCard from '@Utils/components/NewsCard';
@@ -17,75 +17,62 @@ import usePagination from '@Utils/hooks/use-pagination';
 import EmptyListView from '@Utils/components/EmptyListView';
 import SourcesServices from '@Domain/sources/services/sources';
 import { ApiNewsCategory } from 'ts-newsapi';
-
-type SearchBarRefType = TextInput & PropsWithChildren<SearchBarProps>
+import Sources from '@Domain/sources/models/sources';
 
 const searchText = signal('')
 const modalController = signal({
   visible: false,
   errorMsg: ''
 })
+const stopPagination = signal(false)
 
 export default function Search() {
-  const { selectedCategory, categorySources } = useContext(AppState)
+  const categories = useMemo(() => ['general', 'business', 'entertainment', 'health', 'science', 'sports', 'technology'], [])
+  const { selectedCategory } = useContext(AppState)
+
+  const sourcesAsync = computed(() => {
+    return sourcesService.getSourcesByCategory(selectedCategory.value as ApiNewsCategory)
+  })
 
   const newsService = useMemo(() => {
-    return new NewsService()
+    return new NewsService((error) => {
+      console.error(error);
+    })
   }, [])
 
   const sourcesService = useMemo(() => {
-    return new SourcesServices()
+    return new SourcesServices((error) => {
+      console.error(error);
+    })
   }, [])
 
-  const { loading, data, fetchMore, error } = usePagination((page: number, pageSize: number) => {
-    return newsService
-      .getEverythingForQueryAndLanguage(searchText.value.split(' '), 'en', page, pageSize)
-      .then(news => news.news)
-  }, false, 20, 1)
-
-  const fetchCategoryData = (category: ApiNewsCategory) => {
-    if (categorySources.value[category] !== undefined) return Promise.resolve()
-
-    return sourcesService.getSourcesByCategory(category)
-      .then(sources => {
-        categorySources.value[category] = sources
-      })
-      .catch(err => {
-        modalController.value = {
-          visible: true,
-          errorMsg: err.message
-        }
-      })
-  }
-
-  const onSelectedCategory = (category: ApiNewsCategory) => {
-    selectedCategory.value = category
-    fetchCategoryData(category)
-      .then(() => {
-        const allowedSources = categorySources.peek()[category]!.map(source => source.id)
-        const filteredData = data.peek().filter(news => news.source.id && allowedSources.includes(news.source.id))
-
-        data.value = filteredData
-      })
-  }
-
-  const categories = useMemo(() => ['general', 'business', 'entertainment', 'health', 'science', 'sports', 'technology'], [])
-  const searchBarRef = useRef<SearchBarRefType>(null)
+  const { loading, data, fetchMore, reset, error } = usePagination(async (page: number, pageSize: number) => {
+    const sources = (await sourcesAsync.value).slice(0, 20)
+    const news = await newsService
+      .getEverythingForQueryAndLanguageAndSources(searchText.value.split(' '), 'en', sources, page, pageSize);
+    return news.news;
+  }, stopPagination.value, 20, 1)
 
   effect(() => {
-    // empty the list out if the search text cleared
+    // reset the pagination and clears data if the search text cleared
     if (searchText.value.trim().length === 0
       && data.value.length !== 0
       && loading.value === false) {
-      data.value = []
+      reset()
     }
   })
+
+  effect(() => {
+    if (error.value) {
+      stopPagination.value = true
+    }
+  })
+
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
       <SafeAreaView style={styles.container}>
         <SearchBar
-          ref={searchBarRef}
           placeholder="Search"
           value={searchText.value}
           containerStyle={{ width: '100%', backgroundColor: 'inherit', borderTopColor: 'transparent', borderBottomColor: 'transparent' }}
@@ -103,7 +90,7 @@ export default function Search() {
             categoryName={item}
             isSelected={selectedCategory.value === item}
             onPress={() => {
-              onSelectedCategory(item as ApiNewsCategory)
+              selectedCategory.value = item
             }}
             key={key}
           />
