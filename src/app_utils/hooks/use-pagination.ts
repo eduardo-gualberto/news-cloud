@@ -2,10 +2,7 @@ import { useSignal } from "@preact/signals-react"
 import logger  from "@Aplication/Logger";
 
 export default function usePagination<T>(request: (page: number, pageSize: number) => Promise<T[]>, kill: boolean, pagesize = 20, initialPage = 1) {
-    const loggr = logger.extend('Home.usePagination')
-    
-    console.log('usePagination');
-    
+    const loggr = logger.extend('Home.usePagination')    
 
     const page = useSignal(initialPage)
     const pageSize = useSignal(pagesize)

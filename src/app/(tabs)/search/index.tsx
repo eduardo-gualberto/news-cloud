@@ -1,11 +1,10 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { FlatList, StyleSheet, TextInput, View } from 'react-native';
+import { FlatList, StyleSheet, View } from 'react-native';
 import { SearchBar } from '@rneui/themed'
-import { SearchBarProps } from '@rneui/base'
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { computed, effect, signal } from '@preact/signals-react';
-import { PropsWithChildren, useContext, useEffect, useMemo, useRef } from 'react';
+import { computed, signal } from '@preact/signals-react';
+import { useContext, useEffect, useMemo } from 'react';
 import NewsService from '@Domain/news/services/news';
 import ErrorModal from '@Utils/components/Modals/error-modal';
 import NewsCard from '@Utils/components/NewsCard';
@@ -17,7 +16,6 @@ import usePagination from '@Utils/hooks/use-pagination';
 import EmptyListView from '@Utils/components/EmptyListView';
 import SourcesServices from '@Domain/sources/services/sources';
 import { ApiNewsCategory } from 'ts-newsapi';
-import Sources from '@Domain/sources/models/sources';
 
 const searchText = signal('')
 const modalController = signal({
@@ -27,13 +25,6 @@ const modalController = signal({
 const stopPagination = signal(false)
 
 export default function Search() {
-  const categories = useMemo(() => ['general', 'business', 'entertainment', 'health', 'science', 'sports', 'technology'], [])
-  const { selectedCategory } = useContext(AppState)
-
-  const sourcesAsync = computed(() => {
-    return sourcesService.getSourcesByCategory(selectedCategory.value as ApiNewsCategory)
-  })
-
   const newsService = useMemo(() => {
     return new NewsService((error) => {
       console.error(error);
@@ -45,7 +36,7 @@ export default function Search() {
       console.error(error);
     })
   }, [])
-
+  
   const { loading, data, fetchMore, reset, error } = usePagination(async (page: number, pageSize: number) => {
     const sources = (await sourcesAsync.value).slice(0, 20)
     const news = await newsService
@@ -53,20 +44,31 @@ export default function Search() {
     return news.news;
   }, stopPagination.value, 20, 1)
 
-  effect(() => {
+  const categories = useMemo(() => ['general', 'business', 'entertainment', 'health', 'science', 'sports', 'technology'], [])
+  const { selectedCategory } = useContext(AppState)
+  const sourcesAsync = computed(() => {
+    return sourcesService.getSourcesByCategory(selectedCategory.value as ApiNewsCategory)
+  })
+
+  useEffect(() => {
     // reset the pagination and clears data if the search text cleared
     if (searchText.value.trim().length === 0
       && data.value.length !== 0
       && loading.value === false) {
       reset()
     }
-  })
+  }, [searchText.value, data.value, loading.value])
 
-  effect(() => {
+  useEffect(() => {
     if (error.value) {
       stopPagination.value = true
     }
-  })
+  }, [error.value])
+
+  useEffect(() => {
+    reset()
+    fetchMore()
+  }, [selectedCategory.value])
 
   return (
     <>
