@@ -29,4 +29,4 @@ Using Clean Code and DDD offers many benefits, like:
 - Visualize news details (description, author, publish date, source, between others)
 - Click to navigate to an external link to provide the full news article
 
-[App preview](https://imgur.com/a/T3oTRl4)
+https://github.com/eduardo-gualberto/news-cloud/assets/58743989/88f22f6c-860d-4ec7-895f-81ce27885c0b
