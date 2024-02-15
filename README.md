@@ -20,6 +20,7 @@ Using Clean Code and DDD offers many benefits, like:
 - Preact Signals
 - React Native's Context API
 - React Native Element - UI components
+- Git Conventional Commits - adds semantics to git commits
 
 # App features
 
